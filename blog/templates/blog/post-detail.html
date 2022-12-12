@@ -1,0 +1,87 @@
+{% extends "base.html" %} 
+{% load static %}
+
+{% block title %} 
+post title 
+{% endblock %} 
+
+{% block css_files %}
+<link rel="stylesheet" href="{% static "blog/post-detail.css" %}" />
+<link rel="stylesheet" href="{% static "blog/index.css" %}" />
+{% endblock %}
+
+{% block content %}   
+{%if comment_form.errors%}
+<div id ="alert">
+    <h2>saving the comment failed</h2>
+    <p>please submit again</p>
+    <a href="#comment_form">Fix!</a>
+</div>
+{%endif%}
+
+ <section id="summary">
+    <h2>{{post.title}}</h2>
+    <div>
+        {% for tag in post_tag %}
+        <span class="tag">#{{tag.caption }}</span>
+        {%endfor%}
+    </div>
+
+    <div id="read-later">
+        <form action="{% url "read-later" %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" value="{{post.id}}" name="post_id">    
+              <button>
+                {% if  saved_for_later %}
+                remove from Read later
+                {% else %}
+                Read later 
+                {% endif %} 
+                
+            </button>
+        </form>
+      
+    </div>
+
+    <article>
+
+        <img src="{{post.image.url}}" alt="post title">
+        <address> By <a href="mailto:{{post.author.email_adress}}">{{post.author|title}}</a> </address>
+            <div>last updatated on <time>{{post.date|date:"d M Y"}}</time></div>
+    </article>
+
+
+    <main>
+        <p>
+          {{ post.content|linebreaks}}
+         </p>
+        {{form}}
+    </main>
+    <section id="comments">
+        <ul>
+            {%for comment in comments%}
+            <li><h2>{{comment.user_name}} </h2>
+            <p>{{comment.text|linebreaks}}</p>
+            </li>
+            
+            {%endfor%}
+        </ul>
+    </section>
+
+    <section id="comment-form">
+        <h2>your comment</h2>
+            <form action="{% url "blog_by_name" post.id %}" method="POST">
+            {% csrf_token %}
+            {% for form in comment_form%}
+            <div class="form-control {%if form.errors%}invalid{%endif%}">
+                  {{form.label_tag}}
+                  {{form}}
+            </div>
+            {%endfor%}
+            
+            <button>save comment</button>
+        </form>
+    </div>
+
+</section>
+{% endblock %}
